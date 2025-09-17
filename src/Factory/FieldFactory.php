@@ -33,7 +33,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  */
-#[AsDecorator(FieldFactoryInterface::class)]
 final class FieldFactory implements FieldFactoryInterface
 {
     /**

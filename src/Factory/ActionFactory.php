@@ -34,7 +34,6 @@ use function Symfony\Component\Translation\t;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  */
-#[AsDecorator(ActionFactoryInterface::class)]
 final class ActionFactory implements ActionFactoryInterface
 {
     /**
