@@ -42,6 +42,8 @@ final class ActionDto
     private bool|string|TranslatableInterface $confirmationMessage = false;
     private string|TranslatableInterface|null $displayableConfirmationMessage = null;
     private string|TranslatableInterface|null $confirmationButtonLabel = null;
+    /** @var array<string, mixed> */
+    private array $customOptions = [];
 
     public function getType(): string
     {
@@ -450,5 +452,35 @@ final class ActionDto
         }
 
         return $action;
+    }
+
+    /**
+     * @param string $optionName
+     * @param mixed $value
+     *
+     * @return void
+     */
+    public function setCustomOption(string $optionName, mixed $value): void
+    {
+        $this->customOptions[$optionName] = $value;
+    }
+
+    /**
+     * @param string $optionName
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function getCustomOption(string $optionName, mixed $default = null): mixed
+    {
+        return $this->customOptions[$optionName] ?? $default;
+    }
+
+    /**
+     * @return mixed[string, mixed]
+     */
+    public function getCustomOptions(): array
+    {
+        return $this->customOptions;
     }
 }
