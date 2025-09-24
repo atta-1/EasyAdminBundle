@@ -477,7 +477,7 @@ final class ActionDto
     }
 
     /**
-     * @return mixed[string, mixed]
+     * @return array<string, mixed>
      */
     public function getCustomOptions(): array
     {
