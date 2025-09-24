@@ -21,6 +21,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\ActionFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityRepositoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityUpdaterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\AdminContextProviderInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\FieldProviderInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\AssetsDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
@@ -101,7 +102,7 @@ abstract class AbstractCrudController extends AbstractController implements Crud
 
     public function configureFields(string $pageName): iterable
     {
-        return $this->container->get(FieldProvider::class)->getDefaultFields($pageName);
+        return $this->container->get(FieldProviderInterface::class)->getDefaultFields($pageName);
     }
 
     public static function getSubscribedServices(): array
@@ -116,7 +117,7 @@ abstract class AbstractCrudController extends AbstractController implements Crud
             EntityFactory::class => '?'.EntityFactory::class,
             EntityRepositoryInterface::class => '?'.EntityRepositoryInterface::class,
             EntityUpdaterInterface::class => '?'.EntityUpdaterInterface::class,
-            FieldProvider::class => '?'.FieldProvider::class,
+            FieldProviderInterface::class => '?'.FieldProviderInterface::class,
             FilterFactory::class => '?'.FilterFactory::class,
             FormFactory::class => '?'.FormFactory::class,
             PaginatorFactory::class => '?'.PaginatorFactory::class,
