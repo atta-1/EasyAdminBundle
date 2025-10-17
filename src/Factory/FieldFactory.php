@@ -92,18 +92,18 @@ final class FieldFactory implements FieldFactoryInterface
         }
 
         $isDetailOrIndex = \in_array($currentPage, [Crud::PAGE_INDEX, Crud::PAGE_DETAIL], true);
+
         foreach ($fields as $fieldDto) {
-            // Set entityInstance for voter
-            $fieldDto->setEntityInstance($entityDto->getInstance());
+            $fieldDto->setCustomOption('entity.dto', $entityDto);
 
-            // Dynamic permission
-            $className = $entityDto->getFqcn();
-            $fieldName = $fieldDto->getProperty();
-            $permission = sprintf('EASYADMIN_FIELD_%s_%s', strtoupper((new \ReflectionClass($className))->getShortName()), strtoupper($fieldName));
-            $fieldDto->setPermission($permission);
+            if (false === $this->authorizationChecker->isGranted(Permission::EA_VIEW_FIELD, $fieldDto)) {
+                $this->logger->debug('FieldFactory: acl_denied set', ['field' => $fieldDto->getProperty(), 'entityId' => $entityDto->getPrimaryKeyValue()]);
+                $fieldDto->setCustomOption('acl_denied', true);
+                $fields->unset($fieldDto);
+                continue;
+            }
 
-            if ((null !== $currentPage && false === $fieldDto->isDisplayedOn($currentPage))
-                || false === $this->authorizationChecker->isGranted(Permission::EA_VIEW_FIELD, $fieldDto)) {
+            if ((null !== $currentPage && false === $fieldDto->isDisplayedOn($currentPage))) {
                 $fields->unset($fieldDto);
 
                 continue;

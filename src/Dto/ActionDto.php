@@ -44,7 +44,6 @@ final class ActionDto
     private string|TranslatableInterface|null $confirmationButtonLabel = null;
     /** @var array<string, mixed> */
     private array $customOptions = [];
-    private ?object $entityInstance = null;
 
     public function getType(): string
     {
@@ -471,15 +470,5 @@ final class ActionDto
     public function getCustomOptions(): array
     {
         return $this->customOptions;
-    }
-
-    public function getEntityInstance(): ?object
-    {
-        return $this->entityInstance;
-    }
-
-    public function setEntityInstance(?object $entityInstance): void
-    {
-        $this->entityInstance = $entityInstance;
     }
 }

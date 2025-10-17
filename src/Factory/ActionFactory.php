@@ -25,15 +25,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Security\Permission;
 use EasyCorp\Bundle\EasyAdminBundle\Translation\TranslatableMessageBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Twig\Component\Option\ButtonStyle;
 use EasyCorp\Bundle\EasyAdminBundle\Twig\Component\Option\ButtonVariant;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Contracts\Translation\TranslatableInterface;
 use function Symfony\Component\Translation\t;
 
-/**
- * @author Javier Eguiluz <javier.eguiluz@gmail.com>
- */
 final class ActionFactory implements ActionFactoryInterface
 {
     /**
@@ -65,6 +63,8 @@ final class ActionFactory implements ActionFactoryInterface
                     $item->setCustomOption('acl_denied', true);
                     continue;
                 }
+
+                $item->setCustomOption('entity.dto', $entityDto);
 
                 if (false === $item->isDisplayed($entityDto)) {
                     continue;
@@ -180,6 +180,7 @@ final class ActionFactory implements ActionFactoryInterface
                 }
 
                 if (false === $this->authChecker->isGranted(Permission::EA_EXECUTE_ACTION, ['action' => $item, 'entity' => null])) {
+                    $item->setCustomOption('acl_denied', true);
                     continue;
                 }
 
