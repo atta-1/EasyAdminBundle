@@ -67,7 +67,6 @@ final class FieldDto
     /** @var array<string, bool|int|float|string> */
     private array $htmlAttributes = [];
     private bool $isAccessible = true;
-    private ?object $entityInstance = null;
 
     public function __construct()
     {
@@ -573,14 +572,4 @@ final class FieldDto
         return $this->isAccessible;
     }
 
-    public function getEntityInstance(): ?object
-    {
-        return $this->entityInstance;
-    }
-
-    public function setEntityInstance(?object $entityInstance): self
-    {
-        $this->entityInstance = $entityInstance;
-        return $this;
-    }
 }

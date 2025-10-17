@@ -14,15 +14,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGeneratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Security\Permission;
 use EasyCorp\Bundle\EasyAdminBundle\Translation\TranslatableMessageBuilder;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use function Symfony\Component\Translation\t;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
-/**
- * @author Javier Eguiluz <javier.eguiluz@gmail.com>
- */
 final class ActionFactory implements ActionFactoryInterface
 {
     public function __construct(
@@ -42,18 +40,12 @@ final class ActionFactory implements ActionFactoryInterface
                 continue;
             }
 
-            // Set entityInstance for voter
-            $actionDto->setEntityInstance($entityDto->getInstance());
-
-            // Check permissions via voter
             if (false === $this->authChecker->isGranted(Permission::EA_EXECUTE_ACTION, ['action' => $actionDto, 'entity' => $entityDto])) {
                 $actionDto->setCustomOption('acl_denied', true);
                 continue;
             }
 
-            if (false === $actionDto->isDisplayed($entityDto)) {
-                continue;
-            }
+            $actionDto->setCustomOption('entity.dto', $entityDto);
 
             // if CSS class hasn't been overridden, apply the default ones
             if ('' === $actionDto->getCssClass()) {
@@ -91,6 +83,7 @@ final class ActionFactory implements ActionFactoryInterface
             }
 
             if (false === $this->authChecker->isGranted(Permission::EA_EXECUTE_ACTION, ['action' => $actionDto, 'entity' => null])) {
+                $actionDto->setCustomOption('acl_denied', true); // Устанавливаем acl_denied для global actions
                 continue;
             }
 

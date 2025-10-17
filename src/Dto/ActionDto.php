@@ -34,7 +34,6 @@ final class ActionDto
     private $displayCallable;
     /** @var array<string, mixed> */
     private array $customOptions = [];
-    private ?object $entityInstance = null;
 
     public function getType(): string
     {
@@ -352,15 +351,5 @@ final class ActionDto
     public function getCustomOptions(): array
     {
         return $this->customOptions;
-    }
-
-    public function getEntityInstance(): ?object
-    {
-        return $this->entityInstance;
-    }
-
-    public function setEntityInstance(?object $entityInstance): void
-    {
-        $this->entityInstance = $entityInstance;
     }
 }
