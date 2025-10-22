@@ -72,7 +72,6 @@ final class FieldFactory implements FieldFactoryInterface
         private readonly AdminContextProviderInterface $adminContextProvider,
         private readonly AuthorizationCheckerInterface $authorizationChecker,
         private readonly iterable $fieldConfigurators,
-        private readonly FormLayoutFactory $fieldLayoutFactory,
     ) {
     }
 
@@ -94,17 +93,9 @@ final class FieldFactory implements FieldFactoryInterface
         $isDetailOrIndex = \in_array($currentPage, [Crud::PAGE_INDEX, Crud::PAGE_DETAIL], true);
 
         foreach ($fields as $fieldDto) {
-            $fieldDto->setCustomOption('entity.dto', $entityDto);
-
-            if (false === $this->authorizationChecker->isGranted(Permission::EA_VIEW_FIELD, $fieldDto)) {
-                $fieldDto->setCustomOption('acl_denied', true);
+            if ((null !== $currentPage && false === $fieldDto->isDisplayedOn($currentPage))
+                || false === $this->authorizationChecker->isGranted(Permission::EA_VIEW_FIELD, $fieldDto)) {
                 $fields->unset($fieldDto);
-                continue;
-            }
-
-            if ((null !== $currentPage && false === $fieldDto->isDisplayedOn($currentPage))) {
-                $fields->unset($fieldDto);
-
                 continue;
             }
 
