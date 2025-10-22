@@ -571,5 +571,4 @@ final class FieldDto
     {
         return $this->isAccessible;
     }
-
 }

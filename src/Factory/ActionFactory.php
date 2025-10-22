@@ -21,6 +21,9 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use function Symfony\Component\Translation\t;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
+/**
+ * @author Javier Eguiluz <javier.eguiluz@gmail.com>
+ */
 final class ActionFactory implements ActionFactoryInterface
 {
     public function __construct(
@@ -41,11 +44,12 @@ final class ActionFactory implements ActionFactoryInterface
             }
 
             if (false === $this->authChecker->isGranted(Permission::EA_EXECUTE_ACTION, ['action' => $actionDto, 'entity' => $entityDto])) {
-                $actionDto->setCustomOption('acl_denied', true);
                 continue;
             }
 
-            $actionDto->setCustomOption('entity.dto', $entityDto);
+            if (false === $actionDto->isDisplayed($entityDto)) {
+                continue;
+            }
 
             // if CSS class hasn't been overridden, apply the default ones
             if ('' === $actionDto->getCssClass()) {
@@ -83,7 +87,6 @@ final class ActionFactory implements ActionFactoryInterface
             }
 
             if (false === $this->authChecker->isGranted(Permission::EA_EXECUTE_ACTION, ['action' => $actionDto, 'entity' => null])) {
-                $actionDto->setCustomOption('acl_denied', true); // Устанавливаем acl_denied для global actions
                 continue;
             }
 
@@ -132,11 +135,18 @@ final class ActionFactory implements ActionFactoryInterface
         }
 
         if (Action::DELETE === $actionDto->getName()) {
-            $actionDto->addHtmlAttributes([
-                'formaction' => $this->adminUrlGenerator->setController($adminContext->getCrud()->getControllerFqcn())->setAction(Action::DELETE)->setEntityId($entityDto->getPrimaryKeyValue())->generateUrl(),
-                'data-bs-toggle' => 'modal',
-                'data-bs-target' => '#modal-delete',
-            ]);
+            if (null !== $entityDto && null !== $entityDto->getPrimaryKeyValue() && '' !== $entityDto->getPrimaryKeyValueAsString()) {
+                $actionDto->addHtmlAttributes([
+                    'formaction' => $this->adminUrlGenerator->setController($adminContext->getCrud()->getControllerFqcn())->setAction(Action::DELETE)->setEntityId($entityDto->getPrimaryKeyValue())->generateUrl(),
+                    'data-bs-toggle' => 'modal',
+                    'data-bs-target' => '#modal-delete',
+                ]);
+            } else {
+                $actionDto->addHtmlAttributes([
+                    'formaction' => 'javascript:void(0);',
+                    'style' => 'display:none;',
+                ]);
+            }
         }
 
         if ($actionDto->isBatchAction()) {
@@ -193,6 +203,14 @@ final class ActionFactory implements ActionFactoryInterface
     private function generateActionUrl(Request $request, ActionDto $actionDto, ?EntityDto $entityDto = null): string
     {
         $entityInstance = $entityDto?->getInstance();
+
+        // Проверяем, если у нас есть EntityDto, но нет допустимого ID
+        if (!\in_array($actionDto->getName(), [Action::INDEX, Action::NEW, Action::SAVE_AND_ADD_ANOTHER], true)
+            && null !== $entityDto
+            && (null === $entityDto->getPrimaryKeyValueAsString() || '' === $entityDto->getPrimaryKeyValueAsString())
+        ) {
+            return 'javascript:void(0);';
+        }
 
         if (null !== $url = $actionDto->getUrl()) {
             if (\is_callable($url)) {
