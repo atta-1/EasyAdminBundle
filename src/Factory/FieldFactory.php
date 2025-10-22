@@ -72,8 +72,8 @@ final class FieldFactory implements FieldFactoryInterface
         private readonly AdminContextProviderInterface $adminContextProvider,
         private readonly AuthorizationCheckerInterface $authorizationChecker,
         private readonly iterable $fieldConfigurators,
-        private readonly FormLayoutFactory $fieldLayoutFactory)
-    {
+        private readonly FormLayoutFactory $fieldLayoutFactory,
+    ) {
     }
 
     public function processFields(EntityDto $entityDto, FieldCollection $fields, ?string $currentPage = null): void
@@ -97,7 +97,6 @@ final class FieldFactory implements FieldFactoryInterface
             $fieldDto->setCustomOption('entity.dto', $entityDto);
 
             if (false === $this->authorizationChecker->isGranted(Permission::EA_VIEW_FIELD, $fieldDto)) {
-                $this->logger->debug('FieldFactory: acl_denied set', ['field' => $fieldDto->getProperty(), 'entityId' => $entityDto->getPrimaryKeyValue()]);
                 $fieldDto->setCustomOption('acl_denied', true);
                 $fields->unset($fieldDto);
                 continue;
