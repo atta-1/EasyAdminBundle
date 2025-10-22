@@ -68,7 +68,8 @@ final class FieldFactory implements FieldFactoryInterface
         private readonly AdminContextProviderInterface $adminContextProvider,
         private readonly AuthorizationCheckerInterface $authorizationChecker,
         private readonly iterable $fieldConfigurators,
-    ) {
+        private readonly FormLayoutFactory $fieldLayoutFactory)
+    {
     }
 
     public function processFields(EntityDto $entityDto, FieldCollection $fields): void
