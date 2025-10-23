@@ -206,7 +206,7 @@ final class ActionFactory implements ActionFactoryInterface
 
         if (!\in_array($actionDto->getName(), [Action::INDEX, Action::NEW, Action::SAVE_AND_ADD_ANOTHER], true)
             && null !== $entityDto
-            && (null === $entityDto->getPrimaryKeyValueAsString() || '' === $entityDto->getPrimaryKeyValueAsString())
+            && '' === $entityDto->getPrimaryKeyValueAsString()
         ) {
             return 'javascript:void(0);';
         }
