@@ -396,7 +396,6 @@ final class ActionFactory implements ActionFactoryInterface
     {
         $entityInstance = $entityDto?->getInstance();
 
-        // Проверяем, если у нас есть EntityDto, но нет допустимого ID
         if (!\in_array($actionDto->getName(), [Action::INDEX, Action::NEW, Action::SAVE_AND_ADD_ANOTHER], true)
             && null !== $entityDto
             && (null === $entityDto->getPrimaryKeyValueAsString() || '' === $entityDto->getPrimaryKeyValueAsString())
