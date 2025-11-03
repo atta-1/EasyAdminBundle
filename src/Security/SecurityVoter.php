@@ -41,7 +41,7 @@ final class SecurityVoter extends Voter
         }
 
         if (Permission::EA_EXECUTE_ACTION === $permissionName) {
-            if (is_array($subject) && isset($subject['action'])) {
+            if (\is_array($subject) && isset($subject['action'])) {
                 return $this->voteOnExecuteActionPermission(
                     $this->adminContextProvider->getContext()->getCrud(),
                     $subject['action'],

@@ -4,7 +4,6 @@ namespace EasyCorp\Bundle\EasyAdminBundle\Dto;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use Symfony\Contracts\Translation\TranslatableInterface;
-use Throwable;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -294,7 +293,7 @@ final class ActionDto
             }
 
             return ($this->displayCallable)($entityDto->getInstance());
-        } catch (Throwable) {
+        } catch (\Throwable) {
             return false;
         }
     }
