@@ -84,7 +84,6 @@ final class FieldFactory implements FieldFactoryInterface
             if ((null !== $currentPage && false === $fieldDto->isDisplayedOn($currentPage))
                 || false === $this->authorizationChecker->isGranted(Permission::EA_VIEW_FIELD, $fieldDto)) {
                 $fields->unset($fieldDto);
-
                 continue;
             }
 

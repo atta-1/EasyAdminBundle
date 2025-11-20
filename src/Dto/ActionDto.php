@@ -283,7 +283,19 @@ final class ActionDto
 
     public function isDisplayed(?EntityDto $entityDto = null): bool
     {
-        return null === $this->displayCallable || (bool) \call_user_func($this->displayCallable, $entityDto?->getInstance());
+        if (null === $this->displayCallable) {
+            return true;
+        }
+
+        try {
+            if (null === $entityDto || null === $entityDto->getInstance()) {
+                return true;
+            }
+
+            return ($this->displayCallable)($entityDto->getInstance());
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     public function setDisplayCallable(callable $displayCallable): void
