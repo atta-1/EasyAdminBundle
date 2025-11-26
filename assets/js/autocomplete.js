@@ -55,14 +55,14 @@ export default class Autocomplete {
             maxOptions: null,
         });
 
-        document.dispatchEvent(
-            new CustomEvent('ea.autocomplete.pre-connect', { detail: { config, prefix: 'autocomplete' } })
+        element.dispatchEvent(
+            new CustomEvent('ea.autocomplete.pre-connect', { detail: { config, prefix: 'autocomplete' }, bubbles: true })
         );
 
         const tomSelect = new TomSelect(element, config);
 
-        document.dispatchEvent(
-            new CustomEvent('ea.autocomplete.connect', { detail: { tomSelect, config, prefix: 'autocomplete' } })
+        element.dispatchEvent(
+            new CustomEvent('ea.autocomplete.connect', { detail: { tomSelect, config, prefix: 'autocomplete' }, bubbles: true })
         );
 
         return tomSelect;
@@ -93,7 +93,17 @@ export default class Autocomplete {
             },
         });
 
-        return new TomSelect(element, config);
+        element.dispatchEvent(
+            new CustomEvent('ea.autocomplete.pre-connect', { detail: { config, prefix: 'autocomplete' }, bubbles: true })
+        );
+
+        const tomSelect = new TomSelect(element, config);
+
+        element.dispatchEvent(
+            new CustomEvent('ea.autocomplete.connect', { detail: { tomSelect, config, prefix: 'autocomplete' }, bubbles: true })
+        );
+
+        return tomSelect;
     }
 
     #createAutocompleteWithRemoteData(element, autocompleteEndpointUrl) {
@@ -138,7 +148,17 @@ export default class Autocomplete {
             },
         });
 
-        return new TomSelect(element, config);
+        element.dispatchEvent(
+            new CustomEvent('ea.autocomplete.pre-connect', { detail: { config, prefix: 'autocomplete' }, bubbles: true })
+        );
+
+        const tomSelect = new TomSelect(element, config);
+
+        element.dispatchEvent(
+            new CustomEvent('ea.autocomplete.connect', { detail: { tomSelect, config, prefix: 'autocomplete' }, bubbles: true })
+        );
+
+        return tomSelect;
     }
 
     #stripTags(string) {

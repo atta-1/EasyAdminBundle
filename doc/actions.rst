@@ -31,6 +31,8 @@ strings with the action names (``'index'``, ``'detail'``, ``'edit'``, etc.) you
 can also use constants for these values: ``Action::INDEX``, ``Action::DETAIL``,
 ``Action::EDIT``, etc. (they are defined in the ``EasyCorp\Bundle\EasyAdminBundle\Config\Action`` class).
 
+.. _actions-built-in:
+
 Built-in Actions
 ----------------
 
@@ -112,13 +114,9 @@ and EasyAdmin passes the action to it automatically::
     {
         return $actions
             // ...
-            ->update(Crud::PAGE_INDEX, Action::NEW, function (Action $action) {
-                return $action->setIcon('fa fa-file-alt')->setLabel(false);
-            })
-
-            // in PHP 7.4 and newer you can use arrow functions
-            // ->update(Crud::PAGE_INDEX, Action::NEW,
-            //     fn (Action $action) => $action->setIcon('fa fa-file-alt')->setLabel(false))
+            ->update(Crud::PAGE_INDEX, Action::NEW,
+                static fn (Action $action) => $action->setIcon('fa fa-file-alt')->setLabel(false)
+            )
         ;
     }
 
@@ -140,12 +138,7 @@ for that invoice. In order to provide a better user experience, the action link
         public function configureActions(Actions $actions): Actions
         {
             $viewPayments = Action::new('payments')
-                ->setLabel(function (Invoice $invoice)) {
-                    return \count($invoice->getPayments()) . ' payments';
-                });
-
-                // in PHP 7.4 and newer you can use arrow functions
-                // ->setLabel(fn (Invoice $invoice) => \count($invoice->getPayments()) . ' payments')
+                ->setLabel(static fn (Invoice $invoice): string => \count($invoice->getPayments()) . ' payments')
 
             return $actions
                 // ...
@@ -195,12 +188,7 @@ to users::
     public function configureActions(Actions $actions): Actions
     {
         $viewInvoice = Action::new('View Invoice', 'fas fa-file-invoice')
-            ->displayIf(static function ($entity) {
-                return $entity->isPaid();
-            });
-
-            // in PHP 7.4 and newer you can use arrow functions
-            // ->displayIf(fn ($entity) => $entity->isPaid())
+            ->displayIf(static fn (Invoice $invoice): bool => $invoice->isPaid())
 
         return $actions
             // ...
@@ -258,8 +246,25 @@ Permissions are defined globally; you cannot define different permissions per pa
 Reordering Actions
 ------------------
 
-Use the ``reorder()`` to define the order in which actions are displayed
-in some page::
+By default, actions are ordered by type: "primary" actions are displayed first,
+followed by "default", "success", "warning", and, lastly, "danger" actions. This
+ordering also applies to your :ref:`custom actions <actions-custom>`, as explained below.
+
+This ordering usually produces the best visual result. However, you can disable
+this behavior in your application by calling the following method::
+
+    use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions
+            // ...
+            ->disableAutomaticOrdering();
+    }
+}
+
+You can also use the ``reorder()`` method to define an explicit order in which
+actions are displayed on a page::
 
     use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
     use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -283,6 +288,11 @@ in some page::
             ->reorder(Crud::PAGE_INDEX, [Action::DETAIL, 'viewInvoice'])
         ;
     }
+
+.. note::
+
+    When using the ``reorder()`` method, the smart sorting feature is
+    automatically disabled.
 
 Dropdown and Inline Entity Actions
 ----------------------------------
@@ -309,6 +319,157 @@ contents on each row. If you prefer to display all the actions *inline*
             ;
         }
     }
+
+Grouping Actions
+----------------
+
+In addition to individual actions, you can group multiple related actions into
+a single button. This is useful when you have many actions and want to organize
+them better or save space in the interface. Use the ``ActionGroup`` class
+to create these grouped actions::
+
+    use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+    use EasyCorp\Bundle\EasyAdminBundle\Config\ActionGroup;
+    use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+    use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+
+    public function configureActions(Actions $actions): Actions
+    {
+        $publishActions = ActionGroup::new('publish', 'Publish')
+            ->addAction(Action::new('publishNow', 'Publish Now')->linkToCrudAction('...'))
+            ->addAction(Action::new('schedule', 'Schedule...')->linkToCrudAction('...'))
+            ->addAction(Action::new('publishDraft', 'Save as Draft')->linkToCrudAction('...'));
+
+        return $actions
+            // ...
+            ->add(Crud::PAGE_EDIT, $publishActions)
+        ;
+    }
+
+This is how the action group looks in practice:
+
+.. image:: images/easyadmin-action-group.gif
+   :alt: An action group that includes three different actions into a single button
+
+Similar to standalone actions, on the index page there are two types of action
+groups: those associated with each entity and those associated with the entire page::
+
+    public function configureActions(Actions $actions): Actions
+    {
+        $createActions = ActionGroup::new('create')
+            ->createAsGlobalActionGroup()
+            ->addAction(Action::new('new', 'Create Post')->linkToCrudAction('...'))
+            ->addAction(Action::new('draft', 'Draft Post')->linkToCrudAction('...'))
+            ->addAction(Action::new('template', 'Create from Template')->linkToCrudAction('...'));
+
+        $sendActions = ActionGroup::new('send', 'Send ...')
+            ->addAction(Action::new('sendEmail', 'Send by Email')->linkToCrudAction('...'))
+            ->addAction(Action::new('sendSlack', 'Send to Slack')->linkToCrudAction('...'))
+            ->addAction(Action::new('sendTelegram', 'Send via Telegram')->linkToCrudAction('...'));
+
+        return $actions
+            // ...
+            ->add(Crud::PAGE_INDEX, $createActions)
+            ->add(Crud::PAGE_INDEX, $sendActions)
+        ;
+    }
+
+The ``createAsGlobalActionGroup()`` method creates an action group associated
+with the entire page rather than any specific entity. It appears like the image
+shown above for action groups.
+
+When not using the ``createAsGlobalActionGroup()`` method on the index page, the
+action group is displayed as a nested dropdown on each entity row (see the image
+in the next section below).
+
+Split Button Dropdowns
+~~~~~~~~~~~~~~~~~~~~~~
+
+If one of the grouped actions is more common than the others, you can render the
+group as a "split button". This displays the **main action** as a clickable button,
+with the other actions available in the dropdown::
+
+    $publishActions = ActionGroup::new('publish', 'Publish')
+        ->addMainAction(Action::new('publishNow', 'Publish Now')->linkToCrudAction('...'))
+        ->addAction(Action::new('schedule', 'Schedule...')->linkToCrudAction('...'))
+        ->addAction(Action::new('publishDraft', 'Save as Draft')->linkToCrudAction('...'));
+
+Now, the action group will look as follows:
+
+.. image:: images/easyadmin-action-group-split-button.gif
+   :alt: An action group that defines a main action and a list of secondary actions
+
+On the index page, if the action group is associated with each entity, it's
+displayed as a dropdown. In the following image, the first action group is a
+simple dropdown because it doesn't define a main action. The second action
+group is a split dropdown, where the main action is a clickable element and the
+remaining actions appear when hovering over the submenu marker:
+
+.. image:: images/easyadmin-action-group-entity-dropdown.gif
+   :alt: An action group inside an entity dropdown. The second group defines a main action.
+
+Headers and Dividers
+~~~~~~~~~~~~~~~~~~~~
+
+For better organization, especially with many actions in a dropdown, you can add
+headers and dividers to create logical groups::
+
+    $actionsGroup = ActionGroup::new('actions', 'Actions', 'fa fa-cog')
+        ->addHeader('Quick Actions')
+        ->addAction(Action::new('approve', 'Approve')->linkToCrudAction('approve'))
+        ->addAction(Action::new('reject', 'Reject')->linkToCrudAction('reject'))
+        ->addDivider()
+        ->addHeader('Advanced')
+        ->addAction(Action::new('archive', 'Archive')->linkToCrudAction('archive'))
+        ->addAction(Action::new('delete', 'Delete')->linkToCrudAction('delete')
+            ->addCssClass('text-danger'));
+
+Headers help users understand the purpose of each group, while dividers provide
+visual separation between different sections.
+
+Conditional Dropdown Display
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Like regular actions, dropdowns can be displayed conditionally based on the
+entity state or user permissions::
+
+    $moderationGroup = ActionGroup::new('moderation', 'Moderation')
+        // the callable receives the current entity instance or null (in the index page)
+        ->displayIf(static function ($entity) {
+            return null !== $entity && 'pending' === $entity->getStatus();
+        })
+        ->addAction(Action::new('approve', 'Approve')->linkToCrudAction('approve'))
+        ->addAction(Action::new('reject', 'Reject')->linkToCrudAction('reject'));
+
+The dropdown will only appear when the condition is met. Individual actions
+within the dropdown can also have their own display conditions.
+
+Customizing Dropdown Appearance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Dropdowns support the same customization options as regular actions for styling
+and HTML attributes::
+
+    $customGroup = ActionGroup::new('custom', 'Options')
+        // use only an icon, no label
+        ->setLabel(false)
+        ->setIcon('fa fa-ellipsis-v')
+
+        // create different variants of action groups
+        ->asPrimaryActionGroup()
+        ->asDefaultActionGroup()
+        ->asSuccessActionGroup()
+        ->asWarningActionGroup()
+        ->asDangerActionGroup()
+
+        // add custom CSS classes
+        ->addCssClass('my-custom-dropdown')
+
+        // add HTML attributes
+        ->setHtmlAttributes(['data-foo' => 'bar']);
+
+You can also customize individual actions within the dropdown using the standard
+action configuration methods.
 
 .. _actions-custom:
 
@@ -350,23 +511,60 @@ Then you can configure the basic HTML/CSS attributes of the button/element
 that will represent the action::
 
     $viewInvoice = Action::new('viewInvoice', 'Invoice', 'fa fa-file-invoice')
-        // renders the action as a <a> HTML element
-        ->displayAsLink()
-        // renders the action as a <button> HTML element
-        ->displayAsButton()
+        // by default, actions are rendered with `<button>` HTML elements;
+        // use this method to use an `<a>` element instead. Visually, this will
+        // look the same as a button
+        ->renderAsLink()
+
+        // by default, actions are rendered as `<button type="submit" ...>` elements.
+        // this method allows to change it and use a `<button type="button" ...>` element.
+        ->renderAsButton('submit')
+        // also available as EasyCorp\Bundle\EasyAdminBundle\Twig\Component\Option\ButtonType
+        ->renderAsButton(ButtonType::Submit)
+
+        // by default, custom actions are rendered as <a> elements that trigger GET requests.
+        // use this method to render them as <button> elements with an associated hidden <form>,
+        // so that custom actions send a POST request to the action URL.
+        ->renderAsForm()
+
         // a key-value array of attributes to add to the HTML element
         ->setHtmlAttributes(['data-foo' => 'bar', 'target' => '_blank'])
+
+        // by default, actions are shown as `btn-secondary` elements; use the
+        // following actions to change their style and priority accordingly
+        ->asDefaultAction()
+        ->asPrimaryAction()
+        ->asSuccessAction()
+        ->asWarningAction()
+        ->asDangerAction()
+
+        // by default, actions are rendered as solid buttons; this method makes
+        // the action to be rendered as a simple text link without button background
+        // (the background is shown when hovering the action link).
+        ->asTextLink()
+        // you can combine it with the styling methods (e.g. to create a "text danger" action)
+        ->asTextLink()->asDangerAction()
+
         // removes all existing CSS classes of the action and sets
-        // the given value as the CSS class of the HTML element
+        // the given value as the CSS class of the HTML element;
         ->setCssClass('btn btn-primary action-foo')
+
         // adds the given value to the existing CSS classes of the action (this is
         // useful when customizing a built-in action, which already has CSS classes)
         ->addCssClass('some-custom-css-class text-danger')
 
+This is how the different button style variants look in light and dark mode:
+
+.. image:: images/easyadmin-buttons-light-mode.gif
+   :alt: EasyAdmin button variants in light mode
+
+.. image:: images/easyadmin-buttons-dark-mode.gif
+   :alt: EasyAdmin button variants in dark mode
+
 .. note::
 
     When using ``setCssClass()`` or ``addCssClass()`` methods, the action loses
-    the default CSS classes applied by EasyAdmin (``.btn`` and
+    the default CSS classes applied by EasyAdmin (``.btn-*`` and
     ``.action-<the-action-name>``). You might want to add those CSS classes
     manually to make your actions look as expected.
 
@@ -444,17 +642,39 @@ The following example shows all kinds of actions in practice::
     of the shortcuts and utilities available in regular `Symfony controllers`_,
     such as ``$this->render()``, ``$this->redirect()``, and others.
 
-Custom actions can define the ``#[AdminRoute]`` attribute to
-:ref:`customize their route name, path and methods <crud_routes>`::
+It's recommended to apply the ``#[AdminRoute]`` attribute to your custom actions
+to :ref:`customize their route name, path and methods <crud_routes>`. This is
+recommended even for custom actions defined as methods in the CRUD controllers::
+
+    namespace App\Controller\Admin;
 
     use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
-    // ...
+    use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+    use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+    use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
-
-    #[AdminRoute(path: '/invoice', name: 'view_invoice')]
-    public function renderInvoice(AdminContext $context)
+    class OrderCrudController extends AbstractCrudController
     {
+        public function configureActions(Actions $actions): Actions
+        {
+            $viewInvoice = Action::new('viewInvoice', 'Invoice', 'fa fa-file-invoice')
+                ->linkToCrudAction('renderInvoice');
+
+            // ...
+        }
+
         // ...
+
+        #[AdminRoute(path: '/invoice', name: 'view_invoice')]
+        public function renderInvoice(AdminContext $context)
+        {
+            // if the dashboard uses 'admin' as the main route name, the resulting
+            // route of this action will be:
+            //   path: /admin/order/invoice
+            //   name: admin_order_view_invoice
+
+            // ...
+        }
     }
 
 .. _global-actions:
@@ -613,6 +833,7 @@ for the actions using the ``#[AdminRoute]`` attribute::
     namespace App\Controller;
 
     use App\Stats\BusinessStatsCalculator;
+    use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
     use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     use Symfony\Component\Routing\Attribute\Route;
     use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -626,7 +847,6 @@ for the actions using the ``#[AdminRoute]`` attribute::
             $this->businessStatsCalculator = $businessStatsCalculator;
         }
 
-        #[Route("/admin/business-stats", name: "business_stats_index")]
         #[AdminRoute("/", name: "index")]
         public function index()
         {
@@ -635,7 +855,6 @@ for the actions using the ``#[AdminRoute]`` attribute::
             ]);
         }
 
-        #[Route("/admin/business-stats/{id}", name: "business_stats_customer")]
         #[AdminRoute("/{id}", name: "customer")]
         public function customer(Customer $customer)
         {
@@ -673,6 +892,7 @@ the following options::
 
     use App\Controller\Admin\DashboardController;
     use App\Controller\Admin\GuestDashboardController;
+    use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 
     // Use the 'allowedDashboards' option to NOT generate a route for ANY dashboards
     // except those listed explicitly:
@@ -798,6 +1018,63 @@ This is no longer needed in modern EasyAdmin versions and is now a discouraged
 practice that you should avoid in your applications. Instead, see the previous
 section about :ref:`how to integrate custom Symfony controllers into EasyAdmin dashboards <actions-integrating-symfony>`.
 
+Actions Extensions
+------------------
+
+Applications using EasyAdmin define their actions in the ``configureActions()``
+method of the :doc:`CRUD controllers </crud>`. You can enable, disable, or modify
+:ref:`built-in actions <actions-built-in>`, and also create your own
+:ref:`custom actions <actions-custom>`.
+
+EasyAdmin provides an additional feature to add, remove, or change actions
+(built-in or custom) dynamically at runtime: **action extensions**. They allow
+your application (or third-party bundles installed in it) to modify the actions
+defined for your controllers.
+
+Action extensions are PHP classes that receive the full configuration of
+actions in your backend so they can add, remove, or update any of them.
+
+For example, imagine you need a **Duplicate** action across most of your
+backends. Instead of defining it repeatedly, you can create a reusable package
+(such as a `Symfony bundle`_) and add the following class::
+
+    // <your-package>/src/DuplicateActionExtension.php
+    use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+    use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+    use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+    use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+    use EasyCorp\Bundle\EasyAdminBundle\Contracts\Action\ActionsExtensionInterface;
+
+    final class DuplicateActionExtension implements ActionsExtension
+    {
+        // return true in this method to enable the extension for
+        // the current backend request
+        public function supports(AdminContext $context): bool
+        {
+            // enable the extension only on some pages
+            return $context->getCrud()->getCurrentPage() === Crud::PAGE_DETAIL;
+
+            // enable it on all except some entities
+            $entityFqcn = $context->getCrud()->getEntityFqcn();
+            return null !== $entityFqcn && !\in_array(entityFqcn, ['...'], true);
+
+            // or use any other admin context data to make the decision
+        }
+
+        public function extend(Actions $actions, AdminContext $context): void
+        {
+            $duplicate = Action::new('duplicate', 'Duplicate', 'fa fa-clone')
+                ->linkToCrudAction('duplicate')
+                ->asSuccessAction();
+
+            $actions->add(Crud::PAGE_DETAIL, $duplicate);
+
+            // you can add single actions, groups of actions, etc.
+            // you can also remove or update existing actions
+        }
+    }
+
 .. _`FontAwesome`: https://fontawesome.com/
 .. _`Symfony base controller class`: https://symfony.com/doc/current/controller.html#the-base-controller-class-services
 .. _`Symfony controllers`: https://symfony.com/doc/current/controller.html
+.. _`Symfony bundle`: https://symfony.com/doc/current/bundles.html
