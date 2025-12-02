@@ -10,6 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\CrudControllerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\DashboardControllerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\MenuFactoryInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\ActionFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Router\AdminRouteGeneratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionConfigDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\AssetsDto;
@@ -40,7 +41,7 @@ final class AdminContextFactory
         private readonly CrudControllerRegistry $crudControllers,
         private readonly EntityFactory $entityFactory,
         private readonly AdminRouteGeneratorInterface $adminRouteGenerator,
-        private readonly ActionFactory $actionFactory,
+        private readonly ActionFactoryInterface $actionFactory,
     ) {
     }
 
