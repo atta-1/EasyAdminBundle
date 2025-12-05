@@ -3,6 +3,7 @@
 namespace EasyCorp\Bundle\EasyAdminBundle\Tests\Field\Configurator;
 
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\FieldFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\ControllerFactory;
@@ -38,7 +39,7 @@ class AssociationConfiguratorTest extends AbstractFieldTest
             $adminUrlGenerator,
             static::getContainer()->get(RequestStack::class),
             static::getContainer()->get(ControllerFactory::class),
-            static::getContainer()->get(FieldFactory::class),
+            static::getContainer()->get(FieldFactoryInterface::class),
         );
     }
 
