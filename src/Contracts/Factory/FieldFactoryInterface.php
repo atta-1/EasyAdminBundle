@@ -8,7 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 
 interface FieldFactoryInterface
 {
-    public function processFields(EntityDto $entityDto, FieldCollection $fields): void;
+    public function processFields(EntityDto $entityDto, FieldCollection $fields, ?string $pageName = null): void;
 
     public function processFieldsForAll(EntityCollection $entityDtos, FieldCollection $fields, ?string $currentPage = null): void;
 }
