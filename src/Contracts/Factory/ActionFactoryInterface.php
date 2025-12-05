@@ -15,7 +15,7 @@ interface ActionFactoryInterface
     public function processEntityActions(EntityDto $entityDto, ActionConfigDto $actionsDto): void;
 
     public function processGlobalActions(?ActionConfigDto $actionsDto = null): ActionCollection;
-    
+
     public function buildActionsConfig(DashboardControllerInterface $dashboardController, ?CrudControllerInterface $crudController, AdminContext $context, ?string $pageName): ActionConfigDto;
 
     public function processGlobalActionsAndEntityActionsForAll(EntityCollection $entityDtos, ActionConfigDto $actionConfigDto): ActionCollection;
