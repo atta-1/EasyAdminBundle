@@ -19,13 +19,13 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 final class AdminContextProvider implements AdminContextProviderInterface
 {
-    private RequestStack $requestStack;
-
-    public function __construct(RequestStack $requestStack)
+    public function __construct(private readonly RequestStack $requestStack)
     {
-        $this->requestStack = $requestStack;
     }
 
+    /**
+     * @deprecated since 4.27 and it will be removed in EasyAdmin 5.0 without a replacement
+     */
     public function hasContext(): bool
     {
         $currentRequest = $this->requestStack->getCurrentRequest();
@@ -48,7 +48,7 @@ final class AdminContextProvider implements AdminContextProviderInterface
             throw new \LogicException('Cannot use the EasyAdmin context: no request is available.');
         }
 
-        return $currentRequest?->get(EA::CONTEXT_REQUEST_ATTRIBUTE);
+        return $currentRequest?->attributes->get(EA::CONTEXT_REQUEST_ATTRIBUTE);
     }
 
     public function getRequest(): Request
