@@ -286,9 +286,8 @@ return static function (ContainerConfigurator $container) {
         ->set(FieldFactoryInterface::class)
         ->class(FieldFactory::class)
         ->arg(0, service(AdminContextProvider::class))
-        ->arg(1, service(AuthorizationChecker::class))
-        ->arg(2, tagged_iterator(EasyAdminExtension::TAG_FIELD_CONFIGURATOR))
-        ->arg(3, service(FormLayoutFactory::class))
+        ->arg(1, tagged_iterator(EasyAdminExtension::TAG_FIELD_CONFIGURATOR))
+        ->arg(2, service(FormLayoutFactory::class))
 
         ->set(FieldProviderInterface::class)
         ->class(FieldProvider::class)
