@@ -59,8 +59,6 @@ final class ActionFactory implements ActionFactoryInterface
                     continue;
                 }
 
-                $item->setEntityInstance($entityDto->getInstance());
-
                 if (false === $this->authChecker->isGranted(Permission::EA_EXECUTE_ACTION, ['action' => $item, 'entity' => $entityDto])) {
                     continue;
                 }
