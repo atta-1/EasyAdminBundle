@@ -48,7 +48,7 @@ final class AdminContextFactory
         private readonly AdminControllerRegistryInterface $adminControllers,
         private readonly EntityFactory $entityFactory,
         private readonly AdminRouteGeneratorInterface $adminRouteGenerator,
-        private readonly ActionFactory $actionFactory,
+        private readonly ActionFactoryInterface $actionFactory,
         private readonly ?EntityTranslationIdGeneratorInterface $entityTranslationIdGenerator = null,
         private readonly ?CrudControllerRegistry $crudControllers = null,
     ) {
