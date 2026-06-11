@@ -211,7 +211,7 @@ return static function (ContainerConfigurator $container) {
             ->arg(3, new Reference(AdminControllerRegistry::class))
             ->arg(4, new Reference(EntityFactory::class))
             ->arg(5, service(AdminRouteGenerator::class))
-            ->arg(6, service(ActionFactory::class))
+            ->arg(6, service(ActionFactoryInterface::class))
             ->arg(7, service(EntityTranslationIdGeneratorInterface::class))
             ->arg(8, new Reference(CrudControllerRegistry::class))
 
