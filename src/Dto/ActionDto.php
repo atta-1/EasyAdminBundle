@@ -42,6 +42,8 @@ final class ActionDto
     private bool|string|TranslatableInterface $confirmationMessage = false;
     private string|TranslatableInterface|null $displayableConfirmationMessage = null;
     private string|TranslatableInterface|null $confirmationButtonLabel = null;
+    /** @var array<string, mixed> */
+    private array $customOptions = [];
 
     public function getType(): string
     {
@@ -324,7 +326,19 @@ final class ActionDto
 
     public function isDisplayed(?EntityDto $entityDto = null): bool
     {
-        return null === $this->displayCallable || (bool) \call_user_func($this->displayCallable, $entityDto?->getInstance());
+        if (null === $this->displayCallable) {
+            return true;
+        }
+
+        try {
+            if (null === $entityDto || null === $entityDto->getInstance()) {
+                return true;
+            }
+
+            return ($this->displayCallable)($entityDto->getInstance());
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     public function setDisplayCallable(callable $displayCallable): void
@@ -450,5 +464,23 @@ final class ActionDto
         }
 
         return $action;
+    }
+
+    public function setCustomOption(string $optionName, mixed $value): void
+    {
+        $this->customOptions[$optionName] = $value;
+    }
+
+    public function getCustomOption(string $optionName, mixed $default = null): mixed
+    {
+        return $this->customOptions[$optionName] ?? $default;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getCustomOptions(): array
+    {
+        return $this->customOptions;
     }
 }
