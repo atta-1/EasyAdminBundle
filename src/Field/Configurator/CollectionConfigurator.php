@@ -14,6 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\ControllerFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
+use EasyCorp\Bundle\EasyAdminBundle\Factory\FieldFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Form\Type\CrudFormType;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;

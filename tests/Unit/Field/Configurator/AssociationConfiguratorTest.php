@@ -1,11 +1,11 @@
 <?php
 
-namespace EasyCorp\Bundle\EasyAdminBundle\Tests\Unit\Field\Configurator;
+namespace EasyCorp\Bundle\EasyAdminBundle\Tests\Field\Configurator;
 
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\FieldFactoryInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\FieldFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\ControllerFactory;

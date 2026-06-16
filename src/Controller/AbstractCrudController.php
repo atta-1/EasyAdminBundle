@@ -18,11 +18,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\CrudControllerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\ActionFactoryInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\FieldFactoryInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\FieldProviderInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityRepositoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityUpdaterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\AdminContextProviderInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\FieldProviderInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\FieldFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\AssetsDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
@@ -321,7 +321,7 @@ abstract class AbstractCrudController extends AbstractController implements Crud
         /** @var class-string<TEntity> $entityFqcn */
         $entityFqcn = $context->getEntity()->getFqcn();
         $context->getEntity()->setInstance($this->createEntity($entityFqcn));
-        $this->container->get(FieldFactoryInterface::class)->processFields($context->getEntity(), FieldCollection::new($this->configureFields(Crud::PAGE_NEW)), Crud::PAGE_NEW);
+        $this->container->get(FieldFactoryInterface::class)->processFields($context->getEntity(), new FieldCollection($this->configureFields(Crud::PAGE_NEW)), Crud::PAGE_NEW);
         $context->getCrud()->setFieldAssets($this->getFieldAssets($context->getEntity()->getFields()));
         $this->container->get(ActionFactoryInterface::class)->processEntityActions($context->getEntity(), $context->getCrud()->getActionsConfig());
 
@@ -571,7 +571,6 @@ abstract class AbstractCrudController extends AbstractController implements Crud
             throw new ForbiddenActionException($context);
         }
         $fields = new FieldCollection($this->configureFields(Crud::PAGE_INDEX));
-
         $this->container->get(FieldFactoryInterface::class)->processFields($context->getEntity(), $fields, Crud::PAGE_INDEX);
         $filters = $this->container->get(FilterFactory::class)->create($context->getCrud()->getFiltersConfig(), $context->getEntity()->getFields(), $context->getEntity());
 
