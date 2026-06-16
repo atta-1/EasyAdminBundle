@@ -13,6 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Action\ActionsExtensionInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\CrudControllerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Controller\DashboardControllerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\ActionFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\AdminContextProviderInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionConfigDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionDto;
@@ -33,7 +34,7 @@ use function Symfony\Component\Translation\t;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  */
-final class ActionFactory
+final class ActionFactory implements ActionFactoryInterface
 {
     /**
      * @param iterable<ActionsExtensionInterface> $actionsExtensions
@@ -262,9 +263,20 @@ final class ActionFactory
         }
 
         if (Action::DELETE === $actionDto->getName()) {
-            $actionDto->addHtmlAttributes([
-                'formaction' => $this->adminUrlGenerator->setController($adminContext->getCrud()->getControllerFqcn())->setAction(Action::DELETE)->setEntityId($entityDto->getPrimaryKeyValue())->generateUrl(),
-            ]);
+            if (null !== $entityDto && null !== $entityDto->getPrimaryKeyValue() && '' !== $entityDto->getPrimaryKeyValueAsString()) {
+                $actionDto->addHtmlAttributes([
+                    'formaction' => $this->adminUrlGenerator
+                        ->setController($adminContext->getCrud()->getControllerFqcn())
+                        ->setAction(Action::DELETE)
+                        ->setEntityId($entityDto->getPrimaryKeyValue())
+                        ->generateUrl(),
+                ]);
+            } else {
+                $actionDto->addHtmlAttributes([
+                    'formaction' => 'javascript:void(0);',
+                    'style' => 'display:none;',
+                ]);
+            }
         }
 
         // handle action confirmation modals (including DELETE action when askConfirmation is enabled)
@@ -382,6 +394,13 @@ final class ActionFactory
     private function generateActionUrl(Request $request, ActionDto $actionDto, ?EntityDto $entityDto = null): string
     {
         $entityInstance = $entityDto?->getInstance();
+
+        if (!\in_array($actionDto->getName(), [Action::INDEX, Action::NEW, Action::SAVE_AND_ADD_ANOTHER], true)
+            && null !== $entityDto
+            && '' === $entityDto->getPrimaryKeyValueAsString()
+        ) {
+            return 'javascript:void(0);';
+        }
 
         if (null !== $url = $actionDto->getUrl()) {
             if (\is_callable($url)) {
