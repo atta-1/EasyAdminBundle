@@ -5,11 +5,11 @@ namespace EasyCorp\Bundle\EasyAdminBundle\Tests\Unit\Field\Configurator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\FieldFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\ControllerFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
-use EasyCorp\Bundle\EasyAdminBundle\Factory\FieldFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\AssociationConfigurator;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -42,7 +42,7 @@ class AssociationConfiguratorTest extends AbstractFieldTest
             $adminUrlGenerator,
             static::getContainer()->get(RequestStack::class),
             static::getContainer()->get(ControllerFactory::class),
-            static::getContainer()->get(FieldFactory::class),
+            static::getContainer()->get(FieldFactoryInterface::class),
         );
     }
 

@@ -9,6 +9,8 @@ use Doctrine\Persistence\Proxy;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\ActionCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\EntityCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\ActionFactoryInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\FieldFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionConfigDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityBuiltEvent;
@@ -24,13 +26,13 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 final class EntityFactory
 {
     public function __construct(
-        private FieldFactory|AuthorizationCheckerInterface|null $fieldFactory,
-        private ActionFactory|ManagerRegistry|null $actionFactory,
+        private FieldFactoryInterface|AuthorizationCheckerInterface|null $fieldFactory,
+        private ActionFactoryInterface|ManagerRegistry|null $actionFactory,
         private AuthorizationCheckerInterface|EventDispatcherInterface $authorizationChecker,
         private ?ManagerRegistry $doctrine = null,
         private ?EventDispatcherInterface $eventDispatcher = null,
     ) {
-        if ($this->fieldFactory instanceof FieldFactory) {
+        if ($this->fieldFactory instanceof FieldFactoryInterface) {
             trigger_deprecation(
                 'easycorp/easyadmin-bundle',
                 '4.27.0',

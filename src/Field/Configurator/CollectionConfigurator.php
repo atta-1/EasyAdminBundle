@@ -8,12 +8,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\FieldFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\ControllerFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
-use EasyCorp\Bundle\EasyAdminBundle\Factory\FieldFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Form\Type\CrudFormType;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
@@ -36,7 +36,7 @@ final class CollectionConfigurator implements FieldConfiguratorInterface
         private readonly EntityFactory $entityFactory,
         private readonly ControllerFactory $controllerFactory,
         private readonly AdminContextProvider $adminContextProvider,
-        private readonly ?FieldFactory $fieldFactory = null,
+        private readonly ?FieldFactoryInterface $fieldFactory = null,
     ) {
         if (null === $this->fieldFactory) {
             trigger_deprecation(
