@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping\FieldMapping;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\EntityCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Factory\FieldFactoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\AdminContextProviderInterface;
@@ -32,7 +33,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  */
-final class FieldFactory
+final class FieldFactory implements FieldFactoryInterface
 {
     /**
      * @var array<string, class-string<FieldInterface>>
@@ -69,7 +70,6 @@ final class FieldFactory
      */
     public function __construct(
         private readonly AdminContextProviderInterface $adminContextProvider,
-        private readonly AuthorizationCheckerInterface $authorizationChecker,
         private readonly iterable $fieldConfigurators,
         private readonly FormLayoutFactory $fieldLayoutFactory)
     {
@@ -92,10 +92,8 @@ final class FieldFactory
 
         $isDetailOrIndex = \in_array($currentPage, [Crud::PAGE_INDEX, Crud::PAGE_DETAIL], true);
         foreach ($fields as $fieldDto) {
-            if ((null !== $currentPage && false === $fieldDto->isDisplayedOn($currentPage))
-                || false === $this->authorizationChecker->isGranted(Permission::EA_VIEW_FIELD, $fieldDto)) {
+            if ((null !== $currentPage && false === $fieldDto->isDisplayedOn($currentPage))) {
                 $fields->unset($fieldDto);
-
                 continue;
             }
 
